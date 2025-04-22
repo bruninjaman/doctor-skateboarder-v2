@@ -56,13 +56,23 @@ body {
 
 /* Efeito de flash quando coleta moeda */
 @keyframes coinFlash {
-    0% { background-color: #87CEEB; }
-    50% { background-color: rgba(255, 215, 0, 0.3); }
-    100% { background-color: #87CEEB; }
+    0% { background-color: rgba(255, 215, 0, 0.3); }
+    50% { background-color: rgba(255, 215, 0, 0.1); }
+    100% { background-color: transparent; }
+}
+
+@keyframes rainbowFlash {
+    0% { background: linear-gradient(to right, rgba(255, 0, 0, 0.2), rgba(0, 255, 0, 0.2), rgba(0, 0, 255, 0.2)); }
+    50% { background: linear-gradient(to right, rgba(255, 0, 0, 0.1), rgba(0, 255, 0, 0.1), rgba(0, 0, 255, 0.1)); }
+    100% { background: transparent; }
 }
 
 .coin-flash {
-    animation: coinFlash 0.3s ease;
+    animation: coinFlash 0.3s linear;
+}
+
+.rainbow-flash {
+    animation: rainbowFlash 0.3s linear;
 }
 
 /* Efeito de texto ao coletar moeda */
@@ -492,6 +502,55 @@ body {
     z-index: 4;
 }
 
+/* Moeda especial (Rainbow Coin) */
+.rainbow-coin {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    z-index: 5;
+    animation: rainbow-shine 1s linear infinite, spin 0.8s linear infinite, move-fast 3s linear;
+    box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.8);
+    background: linear-gradient(90deg, 
+        #ff0000, #ff7f00, #ffff00, #00ff00, 
+        #0000ff, #4b0082, #8b00ff, #ff0000);
+    background-size: 800% 800%;
+    border: 2px solid white;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    color: white;
+}
+
+@keyframes rainbow-shine {
+    0% { background-position: 0% 50%; box-shadow: 0 0 12px 2px rgba(255, 0, 0, 0.8); }
+    14% { box-shadow: 0 0 12px 2px rgba(255, 127, 0, 0.8); }
+    28% { box-shadow: 0 0 12px 2px rgba(255, 255, 0, 0.8); }
+    42% { box-shadow: 0 0 12px 2px rgba(0, 255, 0, 0.8); }
+    57% { box-shadow: 0 0 12px 2px rgba(0, 0, 255, 0.8); }
+    71% { box-shadow: 0 0 12px 2px rgba(75, 0, 130, 0.8); }
+    85% { box-shadow: 0 0 12px 2px rgba(139, 0, 255, 0.8); }
+    100% { background-position: 100% 50%; box-shadow: 0 0 12px 2px rgba(255, 0, 0, 0.8); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes move-fast {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(30px, 50px); }
+    40% { transform: translate(-50px, 20px); }
+    60% { transform: translate(70px, -30px); }
+    80% { transform: translate(-30px, -50px); }
+    100% { transform: translate(0, 0); }
+}
+
 .bird {
     position: absolute;
     width: 35px;
@@ -644,7 +703,13 @@ body {
     .coin {
         width: 20px;
         height: 20px;
-        font-size: 14px;
+        font-size: 15px;
+    }
+
+    .rainbow-coin {
+        width: 25px;
+        height: 25px;
+        font-size: 18px;
     }
 
     .bird {
@@ -686,4 +751,9 @@ body {
         height: 50px;
         font-size: 1.2em;
     }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.5); }
 }

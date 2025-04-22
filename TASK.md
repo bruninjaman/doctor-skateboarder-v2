@@ -1,8 +1,18 @@
 # Tarefas do Projeto
 
 ## Pendentes
+- [ ] Adicionar moeda especial que brilha arco-íris (Data: 27/06/2024)
+  - [ ] Criar estilo visual de moeda arco-íris com brilho
+  - [ ] Implementar lógica para aparição aleatória
+  - [ ] Fazer moeda se mover rapidamente
+  - [ ] Implementar sistema de valor aleatório entre 1-8 moedas
 
 ## Concluídas
+- [x] Adicionar moeda especial que brilha arco-íris (Data: 27/06/2024)
+  - [x] Criar estilo visual de moeda arco-íris com brilho
+  - [x] Implementar lógica para aparição aleatória
+  - [x] Fazer moeda se mover rapidamente
+  - [x] Implementar sistema de valor aleatório entre 1-8 moedas
 - [x] Transformar o jogo em um aplicativo (Data: 24/11/2023)
   - [x] Adaptar a estrutura HTML para funcionar como um aplicativo
   - [x] Modificar CSS para estilo responsivo e adaptável a dispositivos móveis

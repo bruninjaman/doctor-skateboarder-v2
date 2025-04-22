@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const SPEED_INCREASE_FACTOR = 1.25; // Aumento de 25% na velocidade a cada milestone
     const INTERVAL_DECREASE_FACTOR = 0.85; // Redução de 15% no intervalo a cada milestone
     const MIN_BIRD_SPAWN_DISTANCE = 200; // Distância mínima para spawn de pássaros em relação ao jogador
+    const RAINBOW_COIN_SPAWN_CHANCE = 0.15; // 15% de chance de spawnar uma moeda especial quando cria moeda normal
+    const RAINBOW_COIN_DURATION = 5000; // Duração da moeda especial em milissegundos
 
     // --- Game State ---
     let score = 0;
@@ -115,6 +117,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
+    // Cria um elemento de moeda especial (rainbow coin)
+    function createRainbowCoin() {
+        const rainbowCoin = document.createElement('div');
+        rainbowCoin.classList.add('rainbow-coin');
+        
+        // Valor aleatório entre 1 e 8
+        const coinValue = Math.floor(Math.random() * 8) + 1;
+        rainbowCoin.innerHTML = coinValue;
+        rainbowCoin.dataset.value = coinValue; // Armazena o valor da moeda como atributo de dados
+        
+        // Posição aleatória dentro da área de jogo
+        const gameRect = getRect(gameContainer);
+        const maxCoinX = gameContainer.offsetWidth - 40;
+        const maxCoinY = gameContainer.offsetHeight - 40;
+        
+        // Posicionamento deliberadamente mais no topo para ser mais desafiador
+        rainbowCoin.style.left = `${Math.random() * maxCoinX}px`;
+        rainbowCoin.style.top = `${Math.random() * (maxCoinY * 0.7)}px`;
+        
+        gameContainer.appendChild(rainbowCoin);
+        
+        // Remove a moeda após um tempo se não for coletada
+        setTimeout(() => {
+            if (rainbowCoin && rainbowCoin.parentNode) {
+                // Cria um efeito de desaparecimento
+                rainbowCoin.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => {
+                    if (rainbowCoin && rainbowCoin.parentNode) {
+                        rainbowCoin.remove();
+                    }
+                }, 500);
+            }
+        }, RAINBOW_COIN_DURATION);
+    }
+
     // Cria um elemento de moeda
     function createCoin() {
         const coin = document.createElement('div');
@@ -130,6 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
         coin.style.top = `${Math.random() * (maxCoinY * 0.8)}px`; // Gera principalmente na área superior
 
         gameContainer.appendChild(coin);
+        
+        // Chance aleatória de criar uma moeda especial
+        if (Math.random() < RAINBOW_COIN_SPAWN_CHANCE) {
+            createRainbowCoin();
+        }
     }
 
     // Cria um elemento de pássaro
@@ -200,12 +242,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Cria um efeito de coleta de moeda
-    function createCoinCollectEffect(x, y) {
+    function createCoinCollectEffect(x, y, value = 1) {
         const effect = document.createElement('div');
         effect.classList.add('coin-effect');
-        effect.textContent = '+1';
+        effect.textContent = `+${value}`;
         effect.style.left = `${x}px`;
         effect.style.top = `${y}px`;
+        
+        // Ajusta o estilo conforme o valor da moeda (para moedas especiais)
+        if (value > 1) {
+            effect.style.fontSize = '22px';
+            effect.style.color = '#fff';
+            effect.style.textShadow = '0 0 5px #ff0, 0 0 10px #ff0, 0 0 15px #f0f';
+        }
+        
         gameContainer.appendChild(effect);
         
         // Remove o elemento após a animação
@@ -214,10 +264,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
         
         // Adiciona um flash no fundo do jogo para feedback visual
-        gameContainer.classList.add('coin-flash');
-        setTimeout(() => {
-            gameContainer.classList.remove('coin-flash');
-        }, 300);
+        if (value > 1) {
+            gameContainer.classList.add('rainbow-flash');
+            setTimeout(() => {
+                gameContainer.classList.remove('rainbow-flash');
+            }, 300);
+        } else {
+            gameContainer.classList.add('coin-flash');
+            setTimeout(() => {
+                gameContainer.classList.remove('coin-flash');
+            }, 300);
+        }
     }
 
     // Finaliza o jogo
@@ -334,6 +391,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 2.5 Move as moedas rainbow de forma rápida e errática
+        const specialCoins = document.querySelectorAll('.rainbow-coin');
+        specialCoins.forEach(rainbowCoin => {
+            // Verificar se a moeda já tem a animação de movimento através do CSS
+            // Se não tiver, ou se quisermos um movimento mais dinâmico, podemos implementar:
+            
+            // Movimento aleatório a cada frame para aumentar a dificuldade
+            if (Math.random() < 0.2) { // 20% de chance de mudar de direção a cada frame
+                const moveX = (Math.random() - 0.5) * 12; // -6 a 6 pixels
+                const moveY = (Math.random() - 0.5) * 12; // -6 a 6 pixels
+                
+                let newX = rainbowCoin.offsetLeft + moveX;
+                let newY = rainbowCoin.offsetTop + moveY;
+                
+                // Manter dentro dos limites do jogo
+                newX = Math.max(0, Math.min(newX, gameContainer.offsetWidth - rainbowCoin.offsetWidth));
+                newY = Math.max(0, Math.min(newY, gameContainer.offsetHeight - rainbowCoin.offsetHeight));
+                
+                rainbowCoin.style.left = `${newX}px`;
+                rainbowCoin.style.top = `${newY}px`;
+            }
+        });
+
         // 3. Verifica colisões
         // Jogador vs Moedas
         const coins = document.querySelectorAll('.coin');
@@ -347,6 +427,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 createCoinCollectEffect(effectX, effectY);
                 coin.remove();
                 score++;
+                scoreDisplay.textContent = score;
+                
+                // Verifica se atingiu um milestone (múltiplo de 25)
+                if (score % SCORE_MILESTONE === 0 && score > lastMilestoneScore) {
+                    lastMilestoneScore = score;
+                    killAllBirds(); // Mata todos os pássaros
+                    increaseGameSpeed(); // Aumenta a velocidade do jogo
+                }
+            }
+        });
+        
+        // Jogador vs Moedas Especiais (Rainbow Coins)
+        const rainbowCoins = document.querySelectorAll('.rainbow-coin');
+        rainbowCoins.forEach(rainbowCoin => {
+            if (checkCollision(player, rainbowCoin)) {
+                const coinRect = getRect(rainbowCoin);
+                const gameRect = getRect(gameContainer);
+                const effectX = coinRect.left - gameRect.left;
+                const effectY = coinRect.top - gameRect.top;
+                
+                // Obtém o valor da moeda especial
+                const coinValue = parseInt(rainbowCoin.dataset.value) || 1;
+                
+                createCoinCollectEffect(effectX, effectY, coinValue);
+                rainbowCoin.remove();
+                
+                // Adiciona o valor ao score
+                score += coinValue;
                 scoreDisplay.textContent = score;
                 
                 // Verifica se atingiu um milestone (múltiplo de 25)
@@ -395,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
         appInfo.classList.add('hidden');
 
         // Limpa moedas e pássaros existentes
-        document.querySelectorAll('.coin, .bird, .explosion').forEach(el => el.remove());
+        document.querySelectorAll('.coin, .rainbow-coin, .bird, .explosion').forEach(el => el.remove());
 
         // Reinicia a posição do jogador (usa offsetLeft/Top para posicionamento dentro do pai)
         player.style.left = `${(gameContainer.offsetWidth - player.offsetWidth) / 2}px`;

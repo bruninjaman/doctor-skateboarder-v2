@@ -8,13 +8,15 @@ Um jogo simples e divertido onde você controla um médico skatista que coleta m
 - Funciona em desktops e dispositivos móveis
 - Pode ser instalado como um aplicativo web (PWA)
 - Interface responsiva que se adapta a diferentes tamanhos de tela
+- Moedas especiais arco-íris que valem de 1-8 pontos
 
 ## Como Jogar
 
 1. Clique no botão "Iniciar Jogo" na tela inicial
 2. Use as teclas de seta no desktop ou os botões na tela em dispositivos móveis para mover o personagem
 3. Colete moedas para aumentar sua pontuação
-4. Desvie dos pássaros - se você colidir com um, o jogo acaba!
+4. Fique atento às moedas especiais arco-íris que aparecem aleatoriamente e se movem rápido! Elas valem entre 1-8 pontos!
+5. Desvie dos pássaros - se você colidir com um, o jogo acaba!
 
 ## Instalação como PWA
 

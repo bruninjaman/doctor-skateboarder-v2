@@ -199,6 +199,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500); // Combina com a duração da animação
     }
 
+    // Cria um efeito de coleta de moeda
+    function createCoinCollectEffect(x, y) {
+        const effect = document.createElement('div');
+        effect.classList.add('coin-effect');
+        effect.textContent = '+1';
+        effect.style.left = `${x}px`;
+        effect.style.top = `${y}px`;
+        gameContainer.appendChild(effect);
+        
+        // Remove o elemento após a animação
+        setTimeout(() => {
+            effect.remove();
+        }, 800);
+        
+        // Adiciona um flash no fundo do jogo para feedback visual
+        gameContainer.classList.add('coin-flash');
+        setTimeout(() => {
+            gameContainer.classList.remove('coin-flash');
+        }, 300);
+    }
+
     // Finaliza o jogo
     function gameOver() {
         if (isGameOver) return; // Evita vários acionamentos
@@ -245,6 +266,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         player.style.left = `${newX}px`;
         player.style.top = `${newY}px`;
+
+        // Adiciona efeitos visuais com base no movimento
+        // Remove todas as classes de movimento anteriores
+        player.classList.remove('move-left', 'move-right');
+        
+        // Aplica classes de inclinação com base na direção de movimento
+        if (dx < 0) {
+            player.classList.add('move-left');
+            // Chance de criar efeito de vento quando se move rápido
+            if (Math.random() < 0.2) createWindEffect(newX + player.offsetWidth, newY + player.offsetHeight / 2, 'right');
+        } else if (dx > 0) {
+            player.classList.add('move-right');
+            // Chance de criar efeito de vento quando se move rápido
+            if (Math.random() < 0.2) createWindEffect(newX, newY + player.offsetHeight / 2, 'left');
+        }
+        
+        // Adiciona efeito de salto ao se mover para cima
+        if (dy < 0 && !player.classList.contains('jump')) {
+            player.classList.add('jump');
+            setTimeout(() => {
+                player.classList.remove('jump');
+            }, 500); // Corresponde à duração da animação
+        }
 
         // Atualiza a posição global do jogador (relativa ao contêiner)
         playerX = newX;
@@ -295,6 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const coins = document.querySelectorAll('.coin');
         coins.forEach(coin => {
             if (checkCollision(player, coin)) {
+                const coinRect = getRect(coin);
+                const gameRect = getRect(gameContainer);
+                const effectX = coinRect.left - gameRect.left;
+                const effectY = coinRect.top - gameRect.top;
+                
+                createCoinCollectEffect(effectX, effectY);
                 coin.remove();
                 score++;
                 scoreDisplay.textContent = score;
@@ -352,6 +402,9 @@ document.addEventListener('DOMContentLoaded', () => {
         player.style.top = `${gameContainer.offsetHeight - player.offsetHeight - 10}px`; // Inicia próximo ao fundo novamente
         playerX = player.offsetLeft;
         playerY = player.offsetTop;
+        
+        // Remove qualquer classe de movimento aplicada anteriormente
+        player.classList.remove('move-left', 'move-right', 'jump');
 
         // Inicia intervalos
         gameInterval = setInterval(gameLoop, GAME_LOOP_INTERVAL);
@@ -462,7 +515,42 @@ document.addEventListener('DOMContentLoaded', () => {
         isMobileDevice = checkMobileDevice();
     });
     
+    // Ajusta o tamanho do personagem para dispositivos móveis
+    function adjustPlayerForMobile() {
+        if (isMobileDevice) {
+            document.documentElement.style.setProperty('--player-scale', '0.8');
+        } else {
+            document.documentElement.style.setProperty('--player-scale', '1');
+        }
+    }
+    
     // --- Inicialização ---
     // O jogo não inicia automaticamente agora, aguarda o clique no botão "Iniciar Jogo"
     // A tela de apresentação do aplicativo é exibida primeiro
+    
+    // Ajusta o tamanho do jogador com base no dispositivo
+    adjustPlayerForMobile();
+    window.addEventListener('resize', adjustPlayerForMobile);
+
+    // Cria um efeito de vento atrás do jogador quando ele se move
+    function createWindEffect(x, y, direction) {
+        const wind = document.createElement('div');
+        wind.classList.add('wind');
+        wind.style.left = `${x}px`;
+        wind.style.top = `${y}px`;
+        
+        // Adiciona classe direcional
+        if (direction === 'left') {
+            wind.classList.add('wind-left');
+        } else {
+            wind.classList.add('wind-right');
+        }
+        
+        gameContainer.appendChild(wind);
+        
+        // Remove o elemento após a animação
+        setTimeout(() => {
+            wind.remove();
+        }, 400);
+    }
 });

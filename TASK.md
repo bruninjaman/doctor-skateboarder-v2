@@ -9,6 +9,11 @@
   - [x] Atualizar JavaScript para suportar interações touch
   - [x] Criar manifest.json para configuração do aplicativo web
   - [x] Criar README.md com informações sobre o aplicativo
+- [x] Redesenhar o personagem principal (Data: 25/06/2024)
+  - [x] Substituir emojis por elementos HTML estilizados
+  - [x] Criar visual mais detalhado e estiloso para o médico skatista
+  - [x] Adicionar efeitos visuais para movimento e interações
+  - [x] Melhorar a experiência com feedback visual para coleta de moedas
 
 ## Descobertas Durante o Trabalho
 - Precisamos criar ícones para o aplicativo (icon-192.png e icon-512.png)

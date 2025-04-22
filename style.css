@@ -3,6 +3,10 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+:root {
+    --player-scale: 1;
+}
+
 body {
     display: flex;
     justify-content: center;
@@ -48,6 +52,40 @@ body {
 
 .speed-up {
     animation: speedUp 0.5s ease;
+}
+
+/* Efeito de flash quando coleta moeda */
+@keyframes coinFlash {
+    0% { background-color: #87CEEB; }
+    50% { background-color: rgba(255, 215, 0, 0.3); }
+    100% { background-color: #87CEEB; }
+}
+
+.coin-flash {
+    animation: coinFlash 0.3s ease;
+}
+
+/* Efeito de texto ao coletar moeda */
+.coin-effect {
+    position: absolute;
+    color: gold;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    z-index: 10;
+    pointer-events: none;
+    animation: floatUp 0.8s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(1.5);
+    }
 }
 
 /* Mensagem de nível */
@@ -137,23 +175,304 @@ body {
 
 #player {
     position: absolute;
-    width: 50px;
-    height: 60px;
+    width: 60px;
+    height: 80px;
     bottom: 10px;
-    left: calc(50% - 25px);
-    font-size: 40px;
-    text-align: center;
+    left: calc(50% - 30px);
     z-index: 5;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    transition: transform 0.1s ease-out;
+}
+
+/* Estilo para o personagem completo */
+.character {
+    position: relative;
+    width: 100%;
+    height: 55px;
+    bottom: 0;
+}
+
+/* Cabeça do personagem */
+.head {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #ffdbac;
+    border-radius: 50%;
+    left: 15px;
+    top: 0;
+    z-index: 6;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.face {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    left: 5px;
+    top: 15px;
+    background: linear-gradient(transparent 50%, #ff9b85 50%, #ff9b85 55%, transparent 55%);
+}
+
+.face::before, .face::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #3d3d3d;
+    border-radius: 50%;
+    top: -5px;
+}
+
+.face::before {
+    left: 2px;
+}
+
+.face::after {
+    right: 2px;
+}
+
+.hair {
+    position: absolute;
+    width: 34px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 50% 50% 0 0;
+    top: -2px;
+    left: -2px;
+    z-index: 5;
+}
+
+.sunglasses {
+    position: absolute;
+    width: 32px;
+    height: 10px;
+    top: 7px;
+    left: -1px;
+    background: transparent;
+    z-index: 7;
+}
+
+.sunglasses::before, .sunglasses::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 8px;
+    background: #000;
+    border-radius: 5px;
+    top: 0;
+}
+
+.sunglasses::before {
+    left: 2px;
+}
+
+.sunglasses::after {
+    right: 2px;
+}
+
+.sunglasses::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 2px;
+    background: #000;
+    left: 13px;
+    top: 3px;
+}
+
+/* Corpo do personagem */
+.body {
+    position: absolute;
+    width: 36px;
+    height: 25px;
+    background-color: #fff;
+    border-radius: 8px 8px 0 0;
+    left: 12px;
+    top: 28px;
+    z-index: 5;
+    overflow: hidden;
+}
+
+.coat {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    z-index: 5;
+}
+
+.coat::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 25px;
+    background-color: #4CAF50;
+    left: 0;
+    top: 0;
+}
+
+.coat::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 25px;
+    background-color: #4CAF50;
+    right: 0;
+    top: 0;
+}
+
+.stethoscope {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #3d3d3d;
+    left: 13px;
+    top: 10px;
+    z-index: 6;
+}
+
+.stethoscope::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 12px;
+    background-color: #3d3d3d;
+    left: 4px;
+    top: -8px;
+}
+
+/* Skate */
+.skateboard {
+    position: absolute;
+    width: 60px;
+    height: 15px;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+}
+
+.board {
+    position: absolute;
+    width: 60px;
+    height: 8px;
+    background: linear-gradient(to right, #ff5252, #ff9c40, #ffeb3b, #66bb6a, #42a5f5, #7e57c2);
+    border-radius: 10px;
+    bottom: 7px;
+    left: 0;
+    z-index: 4;
+    transform: perspective(50px) rotateX(10deg);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+.wheels {
+    position: relative;
+    width: 100%;
+    height: 7px;
+}
+
+.wheels::before, .wheels::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 50%;
+    bottom: 0;
+    z-index: 3;
+    box-shadow: 0 0 0 2px #666;
+}
+
+.wheels::before {
+    left: 10px;
+}
+
+.wheels::after {
+    right: 10px;
+}
+
+/* Animação do skateboard ao se mover */
+@keyframes boardRoll {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.wheels::before, .wheels::after {
+    animation: boardRoll 0.8s linear infinite;
+}
+
+/* Efeito de inclinação ao se mover */
+.move-left {
+    transform: rotate(-8deg) translateX(-5px);
+}
+
+.move-right {
+    transform: rotate(8deg) translateX(5px);
+}
+
+/* Efeito de salto */
+.jump {
+    animation: jumpAnim 0.5s ease-out;
+}
+
+@keyframes jumpAnim {
+    0% { bottom: 10px; }
+    50% { bottom: 30px; }
+    100% { bottom: 10px; }
+}
+
+/* Efeito de vento */
+.wind {
+    position: absolute;
+    width: 20px;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.6);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.wind-left {
+    animation: windLeft 0.4s linear forwards;
+}
+
+.wind-right {
+    animation: windRight 0.4s linear forwards;
+}
+
+@keyframes windLeft {
+    from {
+        width: 2px;
+        opacity: 0.8;
+        transform: translateX(0);
+    }
+    to {
+        width: 20px;
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
+@keyframes windRight {
+    from {
+        width: 2px;
+        opacity: 0.8;
+        transform: translateX(0);
+    }
+    to {
+        width: 20px;
+        opacity: 0;
+        transform: translateX(30px);
+    }
 }
 
 #skateboard {
-    display: block;
-    font-size: 30px;
-    margin-top: -10px;
+    display: none; /* Esconde o emoji antigo do skateboard */
 }
 
 .coin {
@@ -299,11 +618,27 @@ body {
     }
 
     #player {
-        font-size: 30px;
+        transform: scale(var(--player-scale));
     }
 
-    #skateboard {
-        font-size: 25px;
+    .sunglasses {
+        width: 30px;
+    }
+
+    .sunglasses::before, .sunglasses::after {
+        width: 10px;
+    }
+
+    .coat::before, .coat::after {
+        width: 8px;
+    }
+
+    .stethoscope {
+        left: 13px;
+    }
+
+    .board {
+        width: 50px;
     }
 
     .coin {

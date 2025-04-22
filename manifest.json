@@ -1,0 +1,24 @@
+{
+  "name": "Doctor Skateboarder",
+  "short_name": "DrSkater",
+  "description": "Colete moedas e desvie dos pássaros neste divertido jogo de skate!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f0f0",
+  "theme_color": "#87CEEB",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+} 

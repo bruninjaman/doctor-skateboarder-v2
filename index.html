@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Doctor Skateboarder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#87CEEB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="images/icon-192.png">
+    <link rel="apple-touch-icon" href="images/icon-192.png">
+</head>
+<body>
+    <div id="app-container">
+        <div id="game-container">
+            <div id="instructions">
+                <span class="desktop-only">Use as Setas para Mover</span>
+                <span class="mobile-only">Toque na Tela para Mover</span>
+            </div>
+            <div id="score-board">Pontos: <span id="score">0</span></div>
+            <div id="player">👨‍⚕️<span id="skateboard">🛹</span></div>
+            <!-- Coins and Birds will be added here by JavaScript -->
+            <div id="game-over" class="hidden">
+                <h2>Fim de Jogo!</h2>
+                <p>Pontuação Final: <span id="final-score">0</span></p>
+                <button id="restart-button">Jogar Novamente?</button>
+            </div>
+            <div id="controls" class="mobile-only">
+                <button id="btn-left">⬅️</button>
+                <button id="btn-right">➡️</button>
+                <button id="btn-up">⬆️</button>
+                <button id="btn-down">⬇️</button>
+            </div>
+        </div>
+        <div id="app-info">
+            <h1>Doctor Skateboarder</h1>
+            <p>Colete moedas e desvie dos pássaros!</p>
+            <p>A cada 25 pontos, todos os pássaros são destruídos e o jogo fica mais rápido!</p>
+            <button id="start-app-button">Iniciar Jogo</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

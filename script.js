@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const SCORE_MILESTONE = 25; // A cada 25 pontos, os pássaros morrem e o jogo fica mais difícil
     const SPEED_INCREASE_FACTOR = 1.25; // Aumento de 25% na velocidade a cada milestone
     const INTERVAL_DECREASE_FACTOR = 0.85; // Redução de 15% no intervalo a cada milestone
+    const MIN_BIRD_SPAWN_DISTANCE = 200; // Distância mínima para spawn de pássaros em relação ao jogador
 
     // --- Game State ---
     let score = 0;
@@ -139,18 +140,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Inicia o pássaro fora da tela (por exemplo, de cima ou dos lados)
         const gameRect = getRect(gameContainer);
-        const startSide = Math.random();
         let startX, startY;
+        let validPosition = false;
+        let attempts = 0;
+        const maxAttempts = 10; // Aumentei o número de tentativas
+        
+        // Posição do jogador
+        const playerCenterX = player.offsetLeft + player.offsetWidth / 2;
+        const playerCenterY = player.offsetTop + player.offsetHeight / 2;
 
-        if (startSide < 0.5) { // Inicia no topo
-            startX = Math.random() * (gameContainer.offsetWidth - 40);
-            startY = -40; // Inicia acima da tela
-        } else if (startSide < 0.75) { // Inicia na esquerda
-            startX = -40;
-            startY = Math.random() * (gameContainer.offsetHeight * 0.6); // Evita começar muito baixo
-        } else { // Inicia na direita
-            startX = gameContainer.offsetWidth;
-            startY = Math.random() * (gameContainer.offsetHeight * 0.6);
+        // Tenta encontrar uma posição válida (longe do jogador)
+        while (!validPosition && attempts < maxAttempts) {
+            // Escolhe uma das posições iniciais (garantindo que estejam FORA da tela)
+            const spawnPosition = Math.random();
+            
+            if (spawnPosition < 0.33) { // Inicia no topo
+                startX = Math.random() * (gameContainer.offsetWidth - 40);
+                startY = -60; // Mais para fora da tela
+            } else if (spawnPosition < 0.66) { // Inicia na esquerda
+                startX = -60; // Mais para fora da tela
+                startY = Math.random() * (gameContainer.offsetHeight * 0.7);
+            } else { // Inicia na direita
+                startX = gameContainer.offsetWidth + 20; // Garante que está fora da tela
+                startY = Math.random() * (gameContainer.offsetHeight * 0.7);
+            }
+            
+            // Calcula a distância entre a posição gerada e o jogador
+            const dx = startX - playerCenterX;
+            const dy = startY - playerCenterY;
+            const distanceToPlayer = Math.sqrt(dx * dx + dy * dy);
+            
+            // Verifica se a distância é adequada
+            if (distanceToPlayer >= MIN_BIRD_SPAWN_DISTANCE) {
+                validPosition = true;
+            }
+            
+            attempts++;
         }
 
         bird.style.left = `${startX}px`;

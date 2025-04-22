@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Atualiza a exibição de vidas
     function updateLives() {
+        // Atualiza apenas o número dentro do coração
         livesDisplay.textContent = lives;
         
         // Efeito visual quando perde vida

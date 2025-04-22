@@ -77,15 +77,13 @@ body {
 
 /* Efeito de flash ao perder vida */
 @keyframes lifeFlash {
-    0% { background-color: rgba(255, 0, 0, 0.3); color: white; }
-    50% { background-color: rgba(255, 0, 0, 0.5); color: white; }
-    100% { background-color: transparent; color: #ff5a5a; }
+    0% { transform: scale(1.3); filter: brightness(1.5); }
+    50% { transform: scale(1.5); filter: brightness(1.8); }
+    100% { transform: scale(1); filter: brightness(1); }
 }
 
 .life-flash {
     animation: lifeFlash 0.5s linear;
-    border-radius: 5px;
-    padding: 0 5px;
 }
 
 /* Efeito de texto ao coletar moeda */
@@ -200,11 +198,26 @@ body {
     position: absolute;
     top: 10px;
     left: 150px;
-    font-size: 1.5em;
+    font-size: 2em;
     font-weight: bold;
-    color: #ff5a5a;
+    color: #ff0000;
     text-shadow: 1px 1px 2px black;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    text-align: center;
+}
+
+#lives-display span {
+    position: absolute;
+    color: white;
+    font-size: 0.6em;
+    font-weight: bold;
+    text-shadow: 0px 0px 2px #000;
+    margin-top: 1px;
 }
 
 #player {

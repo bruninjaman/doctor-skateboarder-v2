@@ -29,8 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const SPEED_INCREASE_FACTOR = 1.25; // Aumento de 25% na velocidade a cada milestone
     const INTERVAL_DECREASE_FACTOR = 0.85; // Redução de 15% no intervalo a cada milestone
     const MIN_BIRD_SPAWN_DISTANCE = 200; // Distância mínima para spawn de pássaros em relação ao jogador
-    const RAINBOW_COIN_SPAWN_CHANCE = 0.15; // 15% de chance de spawnar uma moeda especial quando cria moeda normal
+    const RAINBOW_COIN_SPAWN_CHANCE = 0.08; // 8% de chance de spawnar uma moeda especial quando cria moeda normal
     const RAINBOW_COIN_DURATION = 5000; // Duração da moeda especial em milissegundos
+    const HEART_SPAWN_CHANCE = 0.07; // 7% de chance de spawnar um coração quando cria moeda normal
+    const HEART_DURATION = 7000; // Duração do coração em milissegundos
+    const MAX_LIVES = 5; // Número máximo de vidas que o jogador pode ter
 
     // --- Game State ---
     let score = 0;
@@ -168,6 +171,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }, RAINBOW_COIN_DURATION);
     }
 
+    // Cria um elemento de coração que dá vida ao jogador
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.classList.add('heart-item');
+        
+        // Valor aleatório entre 1 e 3, com maior chance para 1
+        let heartValue;
+        const chance = Math.random();
+        if (chance < 0.7) { // 70% de chance para 1 vida
+            heartValue = 1;
+        } else if (chance < 0.9) { // 20% de chance para 2 vidas
+            heartValue = 2;
+        } else { // 10% de chance para 3 vidas
+            heartValue = 3;
+        }
+        
+        heart.innerHTML = '❤️';
+        heart.dataset.value = heartValue; // Armazena o valor do coração como atributo de dados
+        
+        // Posição aleatória dentro da área de jogo
+        const gameRect = getRect(gameContainer);
+        const maxHeartX = gameContainer.offsetWidth - 40;
+        const maxHeartY = gameContainer.offsetHeight - 40;
+        
+        // Posicionamento deliberadamente mais no topo para ser mais desafiador
+        heart.style.left = `${Math.random() * maxHeartX}px`;
+        heart.style.top = `${Math.random() * (maxHeartY * 0.6)}px`;
+        
+        // Adiciona um efeito de pulsar
+        heart.style.animation = 'pulse 1s infinite, float 3s infinite';
+        
+        gameContainer.appendChild(heart);
+        
+        // Remove o coração após um tempo se não for coletado
+        setTimeout(() => {
+            if (heart && heart.parentNode) {
+                // Cria um efeito de desaparecimento
+                heart.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => {
+                    if (heart && heart.parentNode) {
+                        heart.remove();
+                    }
+                }, 500);
+            }
+        }, HEART_DURATION);
+    }
+
     // Cria um elemento de moeda
     function createCoin() {
         const coin = document.createElement('div');
@@ -184,9 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gameContainer.appendChild(coin);
         
-        // Chance aleatória de criar uma moeda especial
-        if (Math.random() < RAINBOW_COIN_SPAWN_CHANCE) {
+        // Decisão de spawn entre rainbow coin e coração ou nenhum
+        const randomChance = Math.random();
+        if (randomChance < RAINBOW_COIN_SPAWN_CHANCE) {
             createRainbowCoin();
+        } else if (randomChance < (RAINBOW_COIN_SPAWN_CHANCE + HEART_SPAWN_CHANCE)) {
+            createHeart();
         }
     }
 
@@ -291,6 +344,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameContainer.classList.remove('coin-flash');
             }, 300);
         }
+    }
+
+    // Cria um efeito de ganho de vida
+    function createHeartCollectEffect(x, y, value = 1) {
+        const effect = document.createElement('div');
+        effect.classList.add('heart-effect');
+        effect.textContent = `+${value}❤️`;
+        effect.style.left = `${x}px`;
+        effect.style.top = `${y}px`;
+        
+        // Ajusta o estilo conforme o valor do coração
+        if (value > 1) {
+            effect.style.fontSize = '22px';
+            effect.style.color = '#fff';
+            effect.style.textShadow = '0 0 5px #f00, 0 0 10px #f00, 0 0 15px #f00';
+        }
+        
+        gameContainer.appendChild(effect);
+        
+        // Remove o elemento após a animação
+        setTimeout(() => {
+            effect.remove();
+        }, 800);
+        
+        // Adiciona um flash no fundo do jogo para feedback visual
+        gameContainer.classList.add('heart-flash');
+        setTimeout(() => {
+            gameContainer.classList.remove('heart-flash');
+        }, 300);
     }
 
     // Finaliza o jogo
@@ -449,6 +531,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 3. Verifica colisões
+        // Jogador vs Corações
+        const hearts = document.querySelectorAll('.heart-item');
+        hearts.forEach(heart => {
+            if (checkCollision(player, heart)) {
+                const heartRect = getRect(heart);
+                const gameRect = getRect(gameContainer);
+                const effectX = heartRect.left - gameRect.left;
+                const effectY = heartRect.top - gameRect.top;
+                
+                // Obtém o valor do coração
+                const heartValue = parseInt(heart.dataset.value) || 1;
+                
+                // Adiciona vidas, mas respeitando o limite máximo
+                const newLives = Math.min(lives + heartValue, MAX_LIVES);
+                const actualGain = newLives - lives; // Calcula quanto realmente ganhou
+                
+                if (actualGain > 0) {
+                    lives = newLives;
+                    updateLives();
+                    createHeartCollectEffect(effectX, effectY, actualGain);
+                }
+                
+                heart.remove();
+            }
+        });
+        
         // Jogador vs Moedas Especiais (Rainbow Coins)
         const rainbowCoins = document.querySelectorAll('.rainbow-coin');
         rainbowCoins.forEach(rainbowCoin => {

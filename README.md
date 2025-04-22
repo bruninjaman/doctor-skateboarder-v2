@@ -9,6 +9,8 @@ Um jogo simples e divertido onde você controla um médico skatista que coleta m
 - Pode ser instalado como um aplicativo web (PWA)
 - Interface responsiva que se adapta a diferentes tamanhos de tela
 - Moedas especiais arco-íris que valem de 1-8 pontos
+- Sistema de 3 vidas com possibilidade de ganhar vidas extras
+- Corações especiais que podem dar de 1 a 3 vidas extras
 
 ## Como Jogar
 
@@ -16,7 +18,9 @@ Um jogo simples e divertido onde você controla um médico skatista que coleta m
 2. Use as teclas de seta no desktop ou os botões na tela em dispositivos móveis para mover o personagem
 3. Colete moedas para aumentar sua pontuação
 4. Fique atento às moedas especiais arco-íris que aparecem aleatoriamente e se movem rápido! Elas valem entre 1-8 pontos!
-5. Desvie dos pássaros - se você colidir com um, o jogo acaba!
+5. Colete corações para ganhar vidas extras (você pode ter até 5 vidas)
+6. Tenha cuidado com os pássaros - se você colidir com um, perderá uma vida!
+7. O jogo termina quando você perder todas as vidas
 
 ## Instalação como PWA
 

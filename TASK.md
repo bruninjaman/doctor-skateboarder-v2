@@ -8,6 +8,11 @@
   - [ ] Implementar sistema de valor aleatório entre 1-8 moedas
 
 ## Concluídas
+- [x] Implementar sistema de corações para ganhar vidas (Data: 23/10/2024)
+  - [x] Criar estilo visual do coração com animação de pulsar
+  - [x] Implementar lógica para aparição aleatória em vez da moeda arco-íris
+  - [x] Adicionar diferentes valores de vida (1~3) com probabilidades variadas
+  - [x] Limitar o número máximo de vidas que o jogador pode ter
 - [x] Implementar sistema de 3 vidas (Data: 13/08/2024)
   - [x] Adicionar exibição visual de vidas
   - [x] Implementar lógica para perder vidas ao colidir com pássaros

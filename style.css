@@ -75,6 +75,19 @@ body {
     animation: rainbowFlash 0.3s linear;
 }
 
+/* Efeito de flash ao perder vida */
+@keyframes lifeFlash {
+    0% { background-color: rgba(255, 0, 0, 0.3); color: white; }
+    50% { background-color: rgba(255, 0, 0, 0.5); color: white; }
+    100% { background-color: transparent; color: #ff5a5a; }
+}
+
+.life-flash {
+    animation: lifeFlash 0.5s linear;
+    border-radius: 5px;
+    padding: 0 5px;
+}
+
 /* Efeito de texto ao coletar moeda */
 .coin-effect {
     position: absolute;
@@ -179,6 +192,17 @@ body {
     font-size: 1.5em;
     font-weight: bold;
     color: #fff;
+    text-shadow: 1px 1px 2px black;
+    z-index: 10;
+}
+
+#lives-display {
+    position: absolute;
+    top: 10px;
+    left: 150px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ff5a5a;
     text-shadow: 1px 1px 2px black;
     z-index: 10;
 }
@@ -428,7 +452,21 @@ body {
 
 /* Efeito de salto */
 .jump {
-    animation: jumpAnim 0.5s ease-out;
+    animation: jumpAnim 0.5s ease-in-out;
+}
+
+/* Efeito para jogador danificado (piscando) */
+@keyframes damageFlash {
+    0% { opacity: 1; }
+    25% { opacity: 0.5; }
+    50% { opacity: 1; }
+    75% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.damaged {
+    animation: damageFlash 0.3s infinite;
+    pointer-events: none; /* Invulnerável durante este período */
 }
 
 @keyframes jumpAnim {

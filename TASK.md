@@ -8,6 +8,11 @@
   - [ ] Implementar sistema de valor aleatório entre 1-8 moedas
 
 ## Concluídas
+- [x] Implementar sistema de 3 vidas (Data: 13/08/2024)
+  - [x] Adicionar exibição visual de vidas
+  - [x] Implementar lógica para perder vidas ao colidir com pássaros
+  - [x] Adicionar efeito visual de invulnerabilidade temporária após perder uma vida
+  - [x] Atualizar função de fim de jogo para considerar as vidas
 - [x] Corrigir sistema de milestone para moedas especiais (Data: 27/06/2024)
   - [x] Garantir que os marcos de 25 pontos sejam detectados quando uma moeda especial faz o jogador pular vários marcos de uma vez
   - [x] Implementar feedback visual para múltiplos marcos atingidos com uma única moeda

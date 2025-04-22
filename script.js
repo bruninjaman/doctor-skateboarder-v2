@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameContainer = document.getElementById('game-container');
     const player = document.getElementById('player');
     const scoreDisplay = document.getElementById('score');
+    const livesDisplay = document.getElementById('lives');
     const gameOverScreen = document.getElementById('game-over');
     const finalScoreDisplay = document.getElementById('final-score');
     const restartButton = document.getElementById('restart-button');
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentBirdSpeed = INITIAL_BIRD_SPEED;
     let currentCoinSpawnInterval = INITIAL_COIN_SPAWN_INTERVAL;
     let currentBirdSpawnInterval = INITIAL_BIRD_SPAWN_INTERVAL;
+    let lives = 3; // Adicione esta linha para definir a variável lives
 
     // --- Helper Functions ---
 
@@ -82,6 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
                          birdRect.top - gameRect.top + birdRect.height / 2);
             bird.remove();
         });
+    }
+
+    // Atualiza a exibição de vidas
+    function updateLives() {
+        livesDisplay.textContent = lives;
+        
+        // Efeito visual quando perde vida
+        if (lives > 0) {
+            livesDisplay.parentElement.classList.add('life-flash');
+            setTimeout(() => {
+                livesDisplay.parentElement.classList.remove('life-flash');
+            }, 500);
+        }
     }
 
     // Aumenta a velocidade do jogo
@@ -280,6 +295,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Finaliza o jogo
     function gameOver() {
         if (isGameOver) return; // Evita vários acionamentos
+        
+        // Se ainda tiver vidas, apenas perde uma vida
+        if (lives > 1) {
+            lives--;
+            updateLives();
+            
+            // Efeito de invulnerabilidade temporária
+            player.classList.add('damaged');
+            setTimeout(() => {
+                player.classList.remove('damaged');
+            }, 1500);
+            
+            return;
+        }
+        
+        // Perdeu a última vida, fim de jogo
+        lives = 0;
+        updateLives();
         isGameOver = true;
         console.log("Fim de Jogo!");
 
@@ -489,6 +522,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Jogador vs Pássaros
         birds.forEach(bird => {
             if (checkCollision(player, bird)) {
+                // Se o jogador estiver com efeito de dano (invulnerável), ignora a colisão
+                if (player.classList.contains('damaged')) {
+                    return;
+                }
+                
                 // Cria explosão no local do pássaro antes de removê-lo
                 const birdRect = getRect(bird);
                 const gameRect = getRect(gameContainer);
@@ -506,6 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reinicia o estado
         score = 0;
         lastMilestoneScore = 0;
+        lives = 3; // Reinicia o contador de vidas
+        updateLives(); // Atualiza a exibição de vidas
         isGameOver = false;
         gameStarted = true;
         keysPressed = {};
@@ -513,6 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameOverScreen.classList.add('hidden');
         instructions.classList.remove('hidden');
         player.style.opacity = '1';
+        player.classList.remove('damaged'); // Remove qualquer efeito de dano
         
         // Reinicia as velocidades
         currentBirdSpeed = INITIAL_BIRD_SPEED;

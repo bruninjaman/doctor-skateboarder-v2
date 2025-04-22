@@ -8,6 +8,9 @@
   - [ ] Implementar sistema de valor aleatório entre 1-8 moedas
 
 ## Concluídas
+- [x] Corrigir sistema de milestone para moedas especiais (Data: 27/06/2024)
+  - [x] Garantir que os marcos de 25 pontos sejam detectados quando uma moeda especial faz o jogador pular vários marcos de uma vez
+  - [x] Implementar feedback visual para múltiplos marcos atingidos com uma única moeda
 - [x] Adicionar moeda especial que brilha arco-íris (Data: 27/06/2024)
   - [x] Criar estilo visual de moeda arco-íris com brilho
   - [x] Implementar lógica para aparição aleatória

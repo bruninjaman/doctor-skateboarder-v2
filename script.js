@@ -415,29 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 3. Verifica colisões
-        // Jogador vs Moedas
-        const coins = document.querySelectorAll('.coin');
-        coins.forEach(coin => {
-            if (checkCollision(player, coin)) {
-                const coinRect = getRect(coin);
-                const gameRect = getRect(gameContainer);
-                const effectX = coinRect.left - gameRect.left;
-                const effectY = coinRect.top - gameRect.top;
-                
-                createCoinCollectEffect(effectX, effectY);
-                coin.remove();
-                score++;
-                scoreDisplay.textContent = score;
-                
-                // Verifica se atingiu um milestone (múltiplo de 25)
-                if (score % SCORE_MILESTONE === 0 && score > lastMilestoneScore) {
-                    lastMilestoneScore = score;
-                    killAllBirds(); // Mata todos os pássaros
-                    increaseGameSpeed(); // Aumenta a velocidade do jogo
-                }
-            }
-        });
-        
         // Jogador vs Moedas Especiais (Rainbow Coins)
         const rainbowCoins = document.querySelectorAll('.rainbow-coin');
         rainbowCoins.forEach(rainbowCoin => {
@@ -453,8 +430,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 createCoinCollectEffect(effectX, effectY, coinValue);
                 rainbowCoin.remove();
                 
+                // Guarda o score anterior
+                const oldScore = score;
+                
                 // Adiciona o valor ao score
                 score += coinValue;
+                scoreDisplay.textContent = score;
+                
+                // Verifica se passou por algum milestone (múltiplo de 25)
+                // Primeiro calculamos qual era o milestone mais próximo antes da coleta
+                const oldMilestone = Math.floor(oldScore / SCORE_MILESTONE) * SCORE_MILESTONE;
+                // Agora calculamos qual é o milestone atual após a coleta
+                const newMilestone = Math.floor(score / SCORE_MILESTONE) * SCORE_MILESTONE;
+                
+                // Se passamos de pelo menos um milestone
+                if (newMilestone > oldMilestone) {
+                    lastMilestoneScore = newMilestone;
+                    killAllBirds(); // Mata todos os pássaros
+                    increaseGameSpeed(); // Aumenta a velocidade do jogo
+                    
+                    // Se passamos por mais de um milestone de uma vez (caso de moedas de alto valor)
+                    const milestonesJumped = (newMilestone - oldMilestone) / SCORE_MILESTONE;
+                    if (milestonesJumped > 1) {
+                        // Aplica aumentos adicionais de velocidade para cada milestone pulado
+                        for (let i = 1; i < milestonesJumped; i++) {
+                            setTimeout(() => {
+                                increaseGameSpeed();
+                            }, i * 1000); // Aumenta a velocidade a cada segundo para dar um efeito visual
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Jogador vs Moedas Normais
+        const coins = document.querySelectorAll('.coin');
+        coins.forEach(coin => {
+            if (checkCollision(player, coin)) {
+                const coinRect = getRect(coin);
+                const gameRect = getRect(gameContainer);
+                const effectX = coinRect.left - gameRect.left;
+                const effectY = coinRect.top - gameRect.top;
+                
+                createCoinCollectEffect(effectX, effectY);
+                coin.remove();
+                score++;
                 scoreDisplay.textContent = score;
                 
                 // Verifica se atingiu um milestone (múltiplo de 25)

@@ -799,17 +799,31 @@ body {
         padding: 20px;
         width: 80%;
     }
-
+    
     #game-over h2 {
         font-size: 1.5em;
     }
-
+    
     #app-info h1 {
         font-size: 2em;
     }
-
+    
     .heart-item {
         font-size: 25px;
+    }
+    
+    .powerup {
+        width: 25px;
+        height: 25px;
+        font-size: 1em;
+        line-height: 23px;
+    }
+
+    .powerup-indicator {
+        width: 30px;
+        height: 30px;
+        font-size: 1.2em;
+        line-height: 30px;
     }
 }
 
@@ -858,4 +872,144 @@ body {
     0% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
     100% { transform: translateY(0); }
+}
+
+/* Power-ups */
+.powerup {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 1.2em;
+    text-align: center;
+    line-height: 28px;
+    z-index: 6;
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: bold;
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.7);
+    animation: pulse 0.8s infinite alternate, float 3s infinite ease-in-out;
+}
+
+.powerup-2x {
+    background-color: #4de3ff;
+    color: #00547a;
+    border: 2px solid #00547a;
+}
+
+.powerup-4x {
+    background-color: #ff4de0;
+    color: #7a0051;
+    border: 2px solid #7a0051;
+}
+
+.powerup-invincible {
+    background-color: #ffe04d;
+    color: #7a5100;
+    border: 2px solid #7a5100;
+}
+
+.powerup-effect {
+    position: absolute;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 8;
+    user-select: none;
+    -webkit-user-select: none;
+    animation: floatUp 1s ease-out forwards;
+}
+
+.multiplier-2x-effect {
+    color: #4de3ff;
+    text-shadow: 0 0 5px #00547a, 0 0 10px #00547a;
+}
+
+.multiplier-4x-effect {
+    color: #ff4de0;
+    text-shadow: 0 0 5px #7a0051, 0 0 10px #7a0051;
+}
+
+.invincible-effect {
+    color: #ffe04d;
+    text-shadow: 0 0 5px #7a5100, 0 0 10px #7a5100;
+}
+
+@keyframes powerupFlash {
+    0% { background-color: rgba(255, 255, 255, 0); }
+    50% { background-color: rgba(255, 255, 255, 0.3); }
+    100% { background-color: rgba(255, 255, 255, 0); }
+}
+
+.powerup-flash {
+    animation: powerupFlash 0.5s;
+}
+
+/* Indicador de power-up ativo */
+.powerup-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5em;
+    text-align: center;
+    line-height: 40px;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.2);
+    transition: opacity 0.3s, transform 0.3s;
+    --time-left: 1;
+}
+
+.powerup-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: conic-gradient(transparent, transparent calc(var(--time-left) * 100%), rgba(0, 0, 0, 0.5) calc(var(--time-left) * 100%), rgba(0, 0, 0, 0.5));
+    z-index: -1;
+}
+
+.powerup-indicator.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.powerup-indicator.multiplier-2x {
+    background-color: #4de3ff;
+    color: #00547a;
+    border: 2px solid #00547a;
+    box-shadow: 0 0 10px #4de3ff;
+}
+
+.powerup-indicator.multiplier-4x {
+    background-color: #ff4de0;
+    color: #7a0051;
+    border: 2px solid #7a0051;
+    box-shadow: 0 0 10px #ff4de0;
+}
+
+.powerup-indicator.invincible {
+    background-color: #ffe04d;
+    color: #7a5100;
+    border: 2px solid #7a5100;
+    box-shadow: 0 0 10px #ffe04d;
+}
+
+/* Efeito de invencibilidade no jogador */
+.invincible {
+    animation: invincibleFlash 0.3s infinite alternate;
+    box-shadow: 0 0 20px #ffe04d;
+}
+
+@keyframes invincibleFlash {
+    0% { box-shadow: 0 0 10px #ffe04d; }
+    100% { box-shadow: 0 0 25px #ffe04d; }
 }

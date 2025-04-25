@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const HEART_SPAWN_CHANCE = 0.07; // 7% de chance de spawnar um coração quando cria moeda normal
     const HEART_DURATION = 7000; // Duração do coração em milissegundos
     const MAX_LIVES = 5; // Número máximo de vidas que o jogador pode ter
+    const POWERUP_SPAWN_CHANCE = 0.06; // 6% de chance de spawnar um power-up quando cria moeda normal
+    const POWERUP_DURATION = 7000; // Duração dos power-ups em milissegundos
+    const INVINCIBILITY_DURATION = 5000; // Duração da invencibilidade em milissegundos
 
     // --- Game State ---
     let score = 0;
@@ -50,6 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCoinSpawnInterval = INITIAL_COIN_SPAWN_INTERVAL;
     let currentBirdSpawnInterval = INITIAL_BIRD_SPAWN_INTERVAL;
     let lives = 3; // Adicione esta linha para definir a variável lives
+    let isInvincible = false; // Indica se o jogador está invencível com super saúde
+    let pointsMultiplier = 1; // Multiplicador atual de pontos (1x, 2x ou 4x)
+    let activePowerup = null; // Armazena o power-up atual ativo
+    let powerupEndTime = 0; // Armazena quando o power-up atual terminará
 
     // --- Helper Functions ---
 
@@ -218,6 +225,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }, HEART_DURATION);
     }
 
+    // Cria um power-up (2x, 4x ou Super Saúde)
+    function createPowerup() {
+        const powerup = document.createElement('div');
+        powerup.classList.add('powerup');
+        
+        // Determina o tipo de power-up: 0 = 2x pontos, 1 = 4x pontos, 2 = Super Saúde
+        const powerupType = Math.floor(Math.random() * 3);
+        let powerupClassName = '';
+        let powerupText = '';
+        
+        switch (powerupType) {
+            case 0:
+                powerupClassName = 'powerup-2x';
+                powerupText = '2×';
+                powerup.dataset.type = 'multiplier-2x';
+                break;
+            case 1:
+                powerupClassName = 'powerup-4x';
+                powerupText = '4×';
+                powerup.dataset.type = 'multiplier-4x';
+                break;
+            case 2:
+                powerupClassName = 'powerup-invincible';
+                powerupText = '⚡';
+                powerup.dataset.type = 'invincible';
+                break;
+        }
+        
+        powerup.classList.add(powerupClassName);
+        powerup.innerHTML = powerupText;
+        
+        // Posição aleatória dentro da área de jogo
+        const maxPowerupX = gameContainer.offsetWidth - 40;
+        const maxPowerupY = gameContainer.offsetHeight - 40;
+        
+        powerup.style.left = `${Math.random() * maxPowerupX}px`;
+        powerup.style.top = `${Math.random() * (maxPowerupY * 0.7)}px`;
+        
+        gameContainer.appendChild(powerup);
+        
+        // Remove o power-up após um tempo se não for coletado
+        setTimeout(() => {
+            if (powerup && powerup.parentNode) {
+                // Cria um efeito de desaparecimento
+                powerup.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => {
+                    if (powerup && powerup.parentNode) {
+                        powerup.remove();
+                    }
+                }, 500);
+            }
+        }, POWERUP_DURATION);
+    }
+
     // Cria um elemento de moeda
     function createCoin() {
         const coin = document.createElement('div');
@@ -234,12 +295,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gameContainer.appendChild(coin);
         
-        // Decisão de spawn entre rainbow coin e coração ou nenhum
+        // Decisão de spawn entre rainbow coin, coração, power-up ou nenhum
         const randomChance = Math.random();
         if (randomChance < RAINBOW_COIN_SPAWN_CHANCE) {
             createRainbowCoin();
         } else if (randomChance < (RAINBOW_COIN_SPAWN_CHANCE + HEART_SPAWN_CHANCE)) {
             createHeart();
+        } else if (randomChance < (RAINBOW_COIN_SPAWN_CHANCE + HEART_SPAWN_CHANCE + POWERUP_SPAWN_CHANCE)) {
+            createPowerup();
         }
     }
 
@@ -373,6 +436,130 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             gameContainer.classList.remove('heart-flash');
         }, 300);
+    }
+
+    // Cria um efeito de coleta de power-up
+    function createPowerupCollectEffect(x, y, type) {
+        const effect = document.createElement('div');
+        effect.classList.add('powerup-effect');
+        
+        // Configura a aparência e o texto com base no tipo
+        switch (type) {
+            case 'multiplier-2x':
+                effect.textContent = 'PONTOS 2×!';
+                effect.classList.add('multiplier-2x-effect');
+                break;
+            case 'multiplier-4x':
+                effect.textContent = 'PONTOS 4×!';
+                effect.classList.add('multiplier-4x-effect');
+                break;
+            case 'invincible':
+                effect.textContent = 'INVENCÍVEL!';
+                effect.classList.add('invincible-effect');
+                break;
+        }
+        
+        effect.style.left = `${x}px`;
+        effect.style.top = `${y}px`;
+        
+        gameContainer.appendChild(effect);
+        
+        // Remove o elemento após a animação
+        setTimeout(() => {
+            effect.remove();
+        }, 1000);
+        
+        // Adiciona um flash no fundo do jogo para feedback visual
+        gameContainer.classList.add('powerup-flash');
+        setTimeout(() => {
+            gameContainer.classList.remove('powerup-flash');
+        }, 500);
+    }
+
+    // Aplica o efeito do power-up coletado
+    function applyPowerup(type) {
+        // Desativa qualquer power-up anterior se houver
+        clearTimeout(activePowerup);
+        
+        // Atualiza a interface para mostrar o power-up ativo
+        const powerupIndicator = document.getElementById('powerup-indicator') || createPowerupIndicator();
+        
+        // Define o novo power-up
+        switch (type) {
+            case 'multiplier-2x':
+                pointsMultiplier = 2;
+                powerupIndicator.textContent = '2×';
+                powerupIndicator.className = 'powerup-indicator multiplier-2x';
+                break;
+            case 'multiplier-4x':
+                pointsMultiplier = 4;
+                powerupIndicator.textContent = '4×';
+                powerupIndicator.className = 'powerup-indicator multiplier-4x';
+                break;
+            case 'invincible':
+                isInvincible = true;
+                player.classList.add('invincible');
+                powerupIndicator.textContent = '⚡';
+                powerupIndicator.className = 'powerup-indicator invincible';
+                break;
+        }
+        
+        powerupIndicator.classList.add('active');
+        
+        // Configura o tempo de duração do power-up
+        const duration = type === 'invincible' ? INVINCIBILITY_DURATION : POWERUP_DURATION;
+        powerupEndTime = Date.now() + duration;
+        
+        // Configura o contador para desativar o power-up
+        activePowerup = setTimeout(() => {
+            // Reseta os valores
+            if (type === 'invincible') {
+                isInvincible = false;
+                player.classList.remove('invincible');
+            } else {
+                pointsMultiplier = 1;
+            }
+            
+            // Atualiza a interface
+            powerupIndicator.classList.remove('active');
+            setTimeout(() => {
+                if (pointsMultiplier === 1 && !isInvincible) {
+                    powerupIndicator.textContent = '';
+                }
+            }, 500);
+            
+            activePowerup = null;
+            powerupEndTime = 0;
+        }, duration);
+        
+        // Inicia o contador visual de tempo
+        updatePowerupTimeIndicator();
+    }
+
+    // Cria o indicador de power-up na interface
+    function createPowerupIndicator() {
+        const indicator = document.createElement('div');
+        indicator.id = 'powerup-indicator';
+        indicator.className = 'powerup-indicator';
+        gameContainer.appendChild(indicator);
+        return indicator;
+    }
+
+    // Atualiza o indicador de tempo do power-up
+    function updatePowerupTimeIndicator() {
+        if (!powerupEndTime) return;
+        
+        const indicator = document.getElementById('powerup-indicator');
+        if (!indicator) return;
+        
+        const timeLeft = Math.max(0, powerupEndTime - Date.now());
+        const percentage = timeLeft / (activePowerup === 'invincible' ? INVINCIBILITY_DURATION : POWERUP_DURATION);
+        
+        indicator.style.setProperty('--time-left', percentage);
+        
+        if (timeLeft > 0 && (isInvincible || pointsMultiplier > 1)) {
+            requestAnimationFrame(updatePowerupTimeIndicator);
+        }
     }
 
     // Finaliza o jogo
@@ -557,6 +744,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
+        // Jogador vs Power-ups
+        const powerups = document.querySelectorAll('.powerup');
+        powerups.forEach(powerup => {
+            if (checkCollision(player, powerup)) {
+                const powerupRect = getRect(powerup);
+                const gameRect = getRect(gameContainer);
+                const effectX = powerupRect.left - gameRect.left;
+                const effectY = powerupRect.top - gameRect.top;
+                
+                // Obtém o tipo do power-up
+                const powerupType = powerup.dataset.type;
+                
+                // Aplica o efeito do power-up
+                applyPowerup(powerupType);
+                createPowerupCollectEffect(effectX, effectY, powerupType);
+                
+                powerup.remove();
+            }
+        });
+        
         // Jogador vs Moedas Especiais (Rainbow Coins)
         const rainbowCoins = document.querySelectorAll('.rainbow-coin');
         rainbowCoins.forEach(rainbowCoin => {
@@ -569,14 +776,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Obtém o valor da moeda especial
                 const coinValue = parseInt(rainbowCoin.dataset.value) || 1;
                 
-                createCoinCollectEffect(effectX, effectY, coinValue);
+                // Aplica o multiplicador de pontos, se estiver ativo
+                const actualValue = coinValue * pointsMultiplier;
+                
+                createCoinCollectEffect(effectX, effectY, actualValue);
                 rainbowCoin.remove();
                 
                 // Guarda o score anterior
                 const oldScore = score;
                 
                 // Adiciona o valor ao score
-                score += coinValue;
+                score += actualValue;
                 scoreDisplay.textContent = score;
                 
                 // Verifica se passou por algum milestone (múltiplo de 25)
@@ -614,9 +824,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const effectX = coinRect.left - gameRect.left;
                 const effectY = coinRect.top - gameRect.top;
                 
-                createCoinCollectEffect(effectX, effectY);
+                // Aplica o multiplicador de pontos, se estiver ativo
+                const value = 1 * pointsMultiplier;
+                
+                createCoinCollectEffect(effectX, effectY, value);
                 coin.remove();
-                score++;
+                score += value;
                 scoreDisplay.textContent = score;
                 
                 // Verifica se atingiu um milestone (múltiplo de 25)
@@ -631,7 +844,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Jogador vs Pássaros
         birds.forEach(bird => {
             if (checkCollision(player, bird)) {
-                // Se o jogador estiver com efeito de dano (invulnerável), ignora a colisão
+                // Se o jogador estiver invencível com um power-up, destrói o pássaro sem sofrer dano
+                if (isInvincible) {
+                    const birdRect = getRect(bird);
+                    const gameRect = getRect(gameContainer);
+                    createExplosion(birdRect.left - gameRect.left + birdRect.width / 2,
+                                 birdRect.top - gameRect.top + birdRect.height / 2);
+                    bird.remove();
+                    return;
+                }
+                
+                // Se o jogador estiver com efeito de dano (invulnerável temporariamente), ignora a colisão
                 if (player.classList.contains('damaged')) {
                     return;
                 }
@@ -654,6 +877,16 @@ document.addEventListener('DOMContentLoaded', () => {
         score = 0;
         lastMilestoneScore = 0;
         lives = 3; // Reinicia o contador de vidas
+        isInvincible = false; // Reinicia o estado de invencibilidade
+        pointsMultiplier = 1; // Reinicia o multiplicador de pontos
+        clearTimeout(activePowerup); // Limpa qualquer power-up ativo
+        activePowerup = null;
+        powerupEndTime = 0;
+        
+        // Remove o indicador de power-up, se existir
+        const powerupIndicator = document.getElementById('powerup-indicator');
+        if (powerupIndicator) powerupIndicator.remove();
+        
         updateLives(); // Atualiza a exibição de vidas
         isGameOver = false;
         gameStarted = true;
@@ -663,6 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
         instructions.classList.remove('hidden');
         player.style.opacity = '1';
         player.classList.remove('damaged'); // Remove qualquer efeito de dano
+        player.classList.remove('invincible'); // Remove qualquer efeito de invencibilidade
         
         // Reinicia as velocidades
         currentBirdSpeed = INITIAL_BIRD_SPEED;
@@ -672,8 +906,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Oculta a tela inicial
         appInfo.classList.add('hidden');
 
-        // Limpa moedas e pássaros existentes
-        document.querySelectorAll('.coin, .rainbow-coin, .bird, .explosion').forEach(el => el.remove());
+        // Limpa moedas, power-ups, corações e pássaros existentes
+        document.querySelectorAll('.coin, .rainbow-coin, .powerup, .heart-item, .bird, .explosion').forEach(el => el.remove());
 
         // Reinicia a posição do jogador (usa offsetLeft/Top para posicionamento dentro do pai)
         player.style.left = `${(gameContainer.offsetWidth - player.offsetWidth) / 2}px`;

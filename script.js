@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const POWERUP_SPAWN_CHANCE = 0.06; // 6% de chance de spawnar um power-up quando cria moeda normal
     const POWERUP_DURATION = 7000; // Duração dos power-ups em milissegundos
     const INVINCIBILITY_DURATION = 5000; // Duração da invencibilidade em milissegundos
-    const TRICK_CHANCE = 0.15; // 15% de chance de fazer uma manobra quando pula
     const TRAIL_EFFECT_CHANCE = 0.3; // 30% de chance de criar efeito de rastro ao se mover rápido
+    const TRICK_CHANCE = 0; // 0% de chance de fazer uma manobra quando pula (desativado)
     const SPEED_BOOST_DURATION = 200; // Duração do efeito visual de boost de velocidade
 
     // --- Game State ---
@@ -732,19 +732,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dy < 0 && !player.classList.contains('jump')) {
             player.classList.add('jump');
             
-            // Chance de fazer uma manobra legal
-            if (Math.random() < TRICK_CHANCE) {
-                player.classList.add('trick');
-                
-                // Cria um efeito de texto para a manobra
-                const trickNames = ["Ollie!", "Kickflip!", "Heelflip!", "Pop Shove-it!", "360 Flip!"];
-                const randomTrick = trickNames[Math.floor(Math.random() * trickNames.length)];
-                createTrickText(newX, newY - 30, randomTrick);
-            }
-            
             setTimeout(() => {
                 player.classList.remove('jump');
-                player.classList.remove('trick');
             }, 500); // Corresponde à duração da animação
         }
 

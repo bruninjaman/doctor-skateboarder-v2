@@ -559,19 +559,26 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Configura o timeout para remover o power-up
         activePowerupTimeout = setTimeout(() => {
-            // Restaura os valores padrão
-            if (type === 'multiplier-2x' || type === 'multiplier-4x') {
-                pointsMultiplier = 1;
-            } else if (type === 'invincible') {
-                isInvincible = false;
-                player.classList.remove('invincible');
+            // Verifica se este é o mesmo power-up que foi ativado
+            // Isso evita que um timeout de um power-up antigo desative um novo power-up
+            if (activePowerup === type) {
+                // Restaura os valores padrão
+                if (type === 'multiplier-2x' || type === 'multiplier-4x') {
+                    pointsMultiplier = 1;
+                } else if (type === 'invincible') {
+                    isInvincible = false;
+                    player.classList.remove('invincible');
+                }
+                
+                // Oculta o indicador
+                const powerupIndicator = document.getElementById('powerup-indicator');
+                if (powerupIndicator) {
+                    powerupIndicator.classList.remove('active');
+                }
+                
+                // Limpa a referência ao power-up ativo
+                activePowerup = null;
             }
-            
-            // Oculta o indicador
-            powerupIndicator.classList.remove('active');
-            
-            // Limpa a referência ao power-up ativo
-            activePowerup = null;
         }, duration);
     }
 
@@ -596,8 +603,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         indicator.style.setProperty('--time-left', percentage);
         
-        if (timeLeft > 0 && (isInvincible || pointsMultiplier > 1)) {
+        if (timeLeft > 0 && activePowerup) {
             requestAnimationFrame(updatePowerupTimeIndicator);
+        } else if (timeLeft <= 0 && activePowerup) {
+            // Se o tempo acabou mas o activePowerup ainda existe, isso indica um problema
+            // Forçamos a limpeza do power-up
+            if (activePowerup === 'multiplier-2x' || activePowerup === 'multiplier-4x') {
+                pointsMultiplier = 1;
+            } else if (activePowerup === 'invincible') {
+                isInvincible = false;
+                player.classList.remove('invincible');
+            }
+            
+            indicator.classList.remove('active');
+            activePowerup = null;
         }
     }
 
@@ -962,7 +981,12 @@ document.addEventListener('DOMContentLoaded', () => {
         lives = 3; // Reinicia o contador de vidas
         isInvincible = false; // Reinicia o estado de invencibilidade
         pointsMultiplier = 1; // Reinicia o multiplicador de pontos
-        clearTimeout(activePowerup); // Limpa qualquer power-up ativo
+        
+        // Limpa qualquer power-up ativo
+        if (activePowerupTimeout) {
+            clearTimeout(activePowerupTimeout);
+            activePowerupTimeout = null;
+        }
         activePowerup = null;
         powerupEndTime = 0;
         

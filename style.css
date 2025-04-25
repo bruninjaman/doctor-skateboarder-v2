@@ -5,6 +5,10 @@
 
 :root {
     --player-scale: 1;
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --accent-color: #FF5722;
+    --glow-color: rgba(33, 150, 243, 0.6);
 }
 
 body {
@@ -170,7 +174,7 @@ body {
 }
 
 #app-info h1 {
-    font-size: 2.5em;
+    font-size: 2em;
     margin-bottom: 20px;
     color: #4CAF50;
 }
@@ -253,7 +257,8 @@ body {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    transition: transform 0.1s ease-out;
+    transition: transform 0.15s ease-out;
+    filter: drop-shadow(0 0 3px var(--glow-color));
 }
 
 /* Estilo para o personagem completo */
@@ -262,9 +267,10 @@ body {
     width: 100%;
     height: 55px;
     bottom: 0;
+    transition: all 0.2s ease;
 }
 
-/* Cabeça do personagem */
+/* Cabeça do personagem melhorada */
 .head {
     position: absolute;
     width: 30px;
@@ -275,9 +281,29 @@ body {
     top: 0;
     z-index: 6;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease;
 }
 
+.move-left .head {
+    transform: rotate(5deg);
+}
+
+.move-right .head {
+    transform: rotate(-5deg);
+}
+
+.jump .head {
+    animation: headBounce 0.5s ease-in-out;
+}
+
+@keyframes headBounce {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+    100% { transform: translateY(0); }
+}
+
+/* Face com expressões */
 .face {
     position: absolute;
     width: 20px;
@@ -285,8 +311,10 @@ body {
     left: 5px;
     top: 15px;
     background: linear-gradient(transparent 50%, #ff9b85 50%, #ff9b85 55%, transparent 55%);
+    transition: all 0.2s ease;
 }
 
+/* Olhos animados */
 .face::before, .face::after {
     content: '';
     position: absolute;
@@ -295,6 +323,7 @@ body {
     background-color: #3d3d3d;
     border-radius: 50%;
     top: -5px;
+    transition: all 0.2s ease;
 }
 
 .face::before {
@@ -305,17 +334,48 @@ body {
     right: 2px;
 }
 
+/* Expressão concentrada durante movimento */
+.move-left .face::before, .move-right .face::before,
+.move-left .face::after, .move-right .face::after {
+    height: 4px;
+    border-radius: 45% 45% 50% 50%;
+}
+
+/* Cabelo estiloso */
 .hair {
     position: absolute;
     width: 34px;
-    height: 10px;
+    height: 12px;
     background-color: #333;
     border-radius: 50% 50% 0 0;
-    top: -2px;
+    top: -4px;
     left: -2px;
     z-index: 5;
 }
 
+.hair::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 8px;
+    background-color: #333;
+    border-radius: 50% 50% 0 0;
+}
+
+.jump .hair {
+    animation: hairWave 0.5s ease-in-out;
+}
+
+@keyframes hairWave {
+    0% { transform: translateY(0) scaleY(1); }
+    50% { transform: translateY(-2px) scaleY(1.1); }
+    100% { transform: translateY(0) scaleY(1); }
+}
+
+/* Óculos de sol mais estilosos */
 .sunglasses {
     position: absolute;
     width: 32px;
@@ -334,6 +394,7 @@ body {
     background: #000;
     border-radius: 5px;
     top: 0;
+    box-shadow: 0 1px 2px rgba(255,255,255,0.3);
 }
 
 .sunglasses::before {
@@ -344,6 +405,7 @@ body {
     right: 2px;
 }
 
+/* Ponte do óculos */
 .sunglasses::after {
     content: '';
     position: absolute;
@@ -354,7 +416,7 @@ body {
     top: 3px;
 }
 
-/* Corpo do personagem */
+/* Corpo do personagem melhorado */
 .body {
     position: absolute;
     width: 36px;
@@ -365,8 +427,18 @@ body {
     top: 28px;
     z-index: 5;
     overflow: hidden;
+    transition: transform 0.2s ease;
 }
 
+.move-left .body {
+    transform: rotate(3deg);
+}
+
+.move-right .body {
+    transform: rotate(-3deg);
+}
+
+/* Jaleco com detalhes */
 .coat {
     position: absolute;
     width: 100%;
@@ -380,7 +452,7 @@ body {
     position: absolute;
     width: 10px;
     height: 25px;
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     left: 0;
     top: 0;
 }
@@ -390,11 +462,25 @@ body {
     position: absolute;
     width: 10px;
     height: 25px;
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     right: 0;
     top: 0;
 }
 
+/* Adicionar bolso */
+.coat::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-color: var(--primary-color);
+    border-radius: 2px;
+    left: 14px;
+    top: 10px;
+}
+
+/* Estetoscópio mais detalhado */
 .stethoscope {
     position: absolute;
     width: 10px;
@@ -402,8 +488,9 @@ body {
     border-radius: 50%;
     background-color: #3d3d3d;
     left: 13px;
-    top: 10px;
+    top: 5px;
     z-index: 6;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .stethoscope::before {
@@ -414,9 +501,21 @@ body {
     background-color: #3d3d3d;
     left: 4px;
     top: -8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
-/* Skate */
+.stethoscope::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #555;
+    left: 2px;
+    top: 2px;
+}
+
+/* Skate melhorado */
 .skateboard {
     position: absolute;
     width: 60px;
@@ -424,21 +523,56 @@ body {
     bottom: 0;
     left: 0;
     z-index: 4;
+    transition: transform 0.2s ease;
 }
 
+.move-left .skateboard {
+    transform: rotate(-5deg);
+}
+
+.move-right .skateboard {
+    transform: rotate(5deg);
+}
+
+.jump .skateboard {
+    animation: boardJump 0.5s ease-in-out;
+}
+
+@keyframes boardJump {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Shape do skate mais moderno */
 .board {
     position: absolute;
     width: 60px;
     height: 8px;
-    background: linear-gradient(to right, #ff5252, #ff9c40, #ffeb3b, #66bb6a, #42a5f5, #7e57c2);
+    background: linear-gradient(to right, var(--accent-color), var(--secondary-color), var(--primary-color));
     border-radius: 10px;
     bottom: 7px;
     left: 0;
     z-index: 4;
     transform: perspective(50px) rotateX(10deg);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
 }
 
+/* Adicionar detalhes ao shape */
+.board::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 2px;
+    background: rgba(255,255,255,0.5);
+    top: 3px;
+    left: 10px;
+    border-radius: 1px;
+}
+
+/* Rodas com animação melhorada */
 .wheels {
     position: relative;
     width: 100%;
@@ -450,11 +584,11 @@ body {
     position: absolute;
     width: 10px;
     height: 10px;
-    background-color: #333;
+    background: linear-gradient(135deg, #333, #666);
     border-radius: 50%;
     bottom: 0;
     z-index: 3;
-    box-shadow: 0 0 0 2px #666;
+    box-shadow: 0 0 0 2px #666, inset 0 0 3px rgba(255,255,255,0.3);
 }
 
 .wheels::before {
@@ -465,7 +599,7 @@ body {
     right: 10px;
 }
 
-/* Animação do skateboard ao se mover */
+/* Animação do skateboard ao se mover melhorada */
 @keyframes boardRoll {
     0% { transform: rotate(0deg); }
     50% { transform: rotate(180deg); }
@@ -473,51 +607,23 @@ body {
 }
 
 .wheels::before, .wheels::after {
-    animation: boardRoll 0.8s linear infinite;
+    animation: boardRoll 0.6s linear infinite;
 }
 
-/* Efeito de inclinação ao se mover */
-.move-left {
-    transform: rotate(-8deg) translateX(-5px);
+.move-left .wheels::before, .move-left .wheels::after,
+.move-right .wheels::before, .move-right .wheels::after {
+    animation: boardRoll 0.3s linear infinite;
 }
 
-.move-right {
-    transform: rotate(8deg) translateX(5px);
-}
-
-/* Efeito de salto */
-.jump {
-    animation: jumpAnim 0.5s ease-in-out;
-}
-
-/* Efeito para jogador danificado (piscando) */
-@keyframes damageFlash {
-    0% { opacity: 1; }
-    25% { opacity: 0.5; }
-    50% { opacity: 1; }
-    75% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-.damaged {
-    animation: damageFlash 0.3s infinite;
-    pointer-events: none; /* Invulnerável durante este período */
-}
-
-@keyframes jumpAnim {
-    0% { bottom: 10px; }
-    50% { bottom: 30px; }
-    100% { bottom: 10px; }
-}
-
-/* Efeito de vento */
+/* Efeito de vento melhorado */
 .wind {
     position: absolute;
     width: 20px;
     height: 3px;
-    background-color: rgba(255, 255, 255, 0.6);
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
     z-index: 2;
     pointer-events: none;
+    border-radius: 3px;
 }
 
 .wind-left {
@@ -530,28 +636,112 @@ body {
 
 @keyframes windLeft {
     from {
-        width: 2px;
-        opacity: 0.8;
+        width: 5px;
+        opacity: 0.9;
         transform: translateX(0);
     }
     to {
-        width: 20px;
+        width: 30px;
         opacity: 0;
-        transform: translateX(-30px);
+        transform: translateX(-40px);
     }
 }
 
 @keyframes windRight {
     from {
-        width: 2px;
-        opacity: 0.8;
+        width: 5px;
+        opacity: 0.9;
         transform: translateX(0);
     }
     to {
-        width: 20px;
+        width: 30px;
         opacity: 0;
-        transform: translateX(30px);
+        transform: translateX(40px);
     }
+}
+
+/* Efeito de rastro quando se move rápido */
+.speed-trail {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0), 
+        var(--glow-color));
+    z-index: 3;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.speed-trail-active {
+    animation: trailEffect 0.5s ease-out;
+}
+
+@keyframes trailEffect {
+    0% { opacity: 0.7; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(-60px); }
+}
+
+/* Efeito para jogador invencível */
+.invincible {
+    animation: invincibleFlash 0.3s infinite alternate;
+    box-shadow: 0 0 20px var(--accent-color);
+}
+
+@keyframes invincibleFlash {
+    0% { 
+        filter: drop-shadow(0 0 8px var(--accent-color)) brightness(1.1); 
+    }
+    100% { 
+        filter: drop-shadow(0 0 15px var(--accent-color)) brightness(1.3); 
+    }
+}
+
+/* Novas classes de animação para o personagem */
+.move-left {
+    transform: rotate(-10deg) translateX(-8px) !important;
+}
+
+.move-right {
+    transform: rotate(10deg) translateX(8px) !important;
+}
+
+/* Efeito de salto melhorado */
+.jump {
+    animation: jumpAnim 0.5s ease-out !important;
+}
+
+@keyframes jumpAnim {
+    0% { bottom: 10px; transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-5deg) scale(1.05); }
+    50% { bottom: 40px; transform: rotate(0deg) scale(1.1); }
+    75% { transform: rotate(5deg) scale(1.05); }
+    100% { bottom: 10px; transform: rotate(0deg) scale(1); }
+}
+
+/* Efeito de movimento rápido */
+.speed-boost {
+    animation: speedBoost 0.4s linear;
+}
+
+@keyframes speedBoost {
+    0% { filter: blur(0) drop-shadow(0 0 3px var(--glow-color)); }
+    50% { filter: blur(2px) drop-shadow(0 0 10px var(--glow-color)); }
+    100% { filter: blur(0) drop-shadow(0 0 3px var(--glow-color)); }
+}
+
+/* Efeito de manobra */
+.trick {
+    animation: trickAnim 0.8s ease-in-out;
+}
+
+@keyframes trickAnim {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(90deg) scale(0.9); }
+    50% { transform: rotate(180deg) scale(0.8); }
+    75% { transform: rotate(270deg) scale(0.9); }
+    100% { transform: rotate(360deg) scale(1); }
 }
 
 #skateboard {
@@ -1003,13 +1193,93 @@ body {
     box-shadow: 0 0 10px #ffe04d;
 }
 
-/* Efeito de invencibilidade no jogador */
-.invincible {
-    animation: invincibleFlash 0.3s infinite alternate;
-    box-shadow: 0 0 20px #ffe04d;
+/* Texto de manobras */
+.trick-text {
+    position: absolute;
+    font-size: 18px;
+    font-weight: bold;
+    color: #FF5722;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.5);
+    z-index: 15;
+    pointer-events: none;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
-@keyframes invincibleFlash {
-    0% { box-shadow: 0 0 10px #ffe04d; }
-    100% { box-shadow: 0 0 25px #ffe04d; }
+/* Aparência do jogador invencível */
+.invincible .head {
+    animation: invinciblePulse 0.8s infinite alternate;
+}
+
+.invincible .body {
+    animation: invincibleGlow 1s infinite alternate;
+}
+
+.invincible .board {
+    background: linear-gradient(
+        90deg,
+        var(--accent-color),
+        var(--secondary-color),
+        var(--primary-color),
+        var(--secondary-color),
+        var(--accent-color)
+    );
+    background-size: 300% 100%;
+    animation: rainbowShift 2s linear infinite;
+}
+
+.invincible .wheels::before,
+.invincible .wheels::after {
+    background: linear-gradient(135deg, #fff, #ddd);
+    animation: boardRoll 0.3s linear infinite, glowPulse 0.8s infinite alternate;
+}
+
+@keyframes invinciblePulse {
+    0% { 
+        transform: scale(1);
+        box-shadow: 0 0 5px var(--accent-color);
+    }
+    100% { 
+        transform: scale(1.1);
+        box-shadow: 0 0 15px var(--accent-color);
+    }
+}
+
+@keyframes invincibleGlow {
+    0% { 
+        box-shadow: 0 0 5px var(--secondary-color);
+    }
+    100% { 
+        box-shadow: 0 0 15px var(--secondary-color);
+    }
+}
+
+@keyframes glowPulse {
+    0% { 
+        box-shadow: 0 0 0 2px #666, 0 0 5px var(--accent-color);
+    }
+    100% { 
+        box-shadow: 0 0 0 2px #666, 0 0 15px var(--accent-color);
+    }
+}
+
+@keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Efeito para jogador danificado (piscando) */
+@keyframes damageFlash {
+    0% { opacity: 1; }
+    25% { opacity: 0.5; }
+    50% { opacity: 1; }
+    75% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.damaged {
+    animation: damageFlash 0.3s infinite;
+    pointer-events: none; /* Invulnerável durante este período */
 }

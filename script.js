@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const POWERUP_SPAWN_CHANCE = 0.06; // 6% de chance de spawnar um power-up quando cria moeda normal
     const POWERUP_DURATION = 7000; // Duração dos power-ups em milissegundos
     const INVINCIBILITY_DURATION = 5000; // Duração da invencibilidade em milissegundos
+    const TRICK_CHANCE = 0.15; // 15% de chance de fazer uma manobra quando pula
+    const TRAIL_EFFECT_CHANCE = 0.3; // 30% de chance de criar efeito de rastro ao se mover rápido
+    const SPEED_BOOST_DURATION = 200; // Duração do efeito visual de boost de velocidade
 
     // --- Game State ---
     let score = 0;
@@ -57,6 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let pointsMultiplier = 1; // Multiplicador atual de pontos (1x, 2x ou 4x)
     let activePowerup = null; // Armazena o power-up atual ativo
     let powerupEndTime = 0; // Armazena quando o power-up atual terminará
+    let activePowerupTimeout = null; // Para armazenar o ID do timeout do powerup ativo
+    let lastDx = 0; // Última direção X do movimento
+    let lastDy = 0; // Última direção Y do movimento
+    let movementCounter = 0; // Contador de movimentos consecutivos
 
     // --- Helper Functions ---
 
@@ -478,62 +485,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Aplica o efeito do power-up coletado
     function applyPowerup(type) {
-        // Desativa qualquer power-up anterior se houver
-        clearTimeout(activePowerup);
-        
-        // Atualiza a interface para mostrar o power-up ativo
-        const powerupIndicator = document.getElementById('powerup-indicator') || createPowerupIndicator();
-        
-        // Define o novo power-up
-        switch (type) {
-            case 'multiplier-2x':
-                pointsMultiplier = 2;
-                powerupIndicator.textContent = '2×';
-                powerupIndicator.className = 'powerup-indicator multiplier-2x';
-                break;
-            case 'multiplier-4x':
-                pointsMultiplier = 4;
-                powerupIndicator.textContent = '4×';
-                powerupIndicator.className = 'powerup-indicator multiplier-4x';
-                break;
-            case 'invincible':
-                isInvincible = true;
-                player.classList.add('invincible');
-                powerupIndicator.textContent = '⚡';
-                powerupIndicator.className = 'powerup-indicator invincible';
-                break;
-        }
-        
-        powerupIndicator.classList.add('active');
-        
-        // Configura o tempo de duração do power-up
-        const duration = type === 'invincible' ? INVINCIBILITY_DURATION : POWERUP_DURATION;
-        powerupEndTime = Date.now() + duration;
-        
-        // Configura o contador para desativar o power-up
-        activePowerup = setTimeout(() => {
-            // Reseta os valores
-            if (type === 'invincible') {
+        // Cancela o power-up anterior, se houver
+        if (activePowerup) {
+            clearTimeout(activePowerupTimeout);
+            
+            // Restaura os valores padrão
+            if (activePowerup === 'multiplier-2x' || activePowerup === 'multiplier-4x') {
+                pointsMultiplier = 1;
+            } else if (activePowerup === 'invincible') {
                 isInvincible = false;
                 player.classList.remove('invincible');
-            } else {
-                pointsMultiplier = 1;
             }
+        }
+        
+        // Registra o novo power-up ativo
+        activePowerup = type;
+        
+        // Atualiza o indicador
+        const powerupIndicator = document.querySelector('.powerup-indicator') || createPowerupIndicator();
+        powerupIndicator.className = 'powerup-indicator active'; // Remove classes anteriores
+        powerupIndicator.classList.add(type);
+        powerupIndicator.textContent = ''; // Limpa o conteúdo anterior
+        
+        // Configura o temporizador
+        const now = Date.now();
+        let duration = POWERUP_DURATION;
+        
+        if (type === 'multiplier-2x') {
+            pointsMultiplier = 2;
+            powerupIndicator.textContent = '2x';
             
-            // Atualiza a interface
-            powerupIndicator.classList.remove('active');
+            // Efeito visual no jogador
+            player.classList.add('powerup-flash');
             setTimeout(() => {
-                if (pointsMultiplier === 1 && !isInvincible) {
-                    powerupIndicator.textContent = '';
-                }
+                player.classList.remove('powerup-flash');
             }, 500);
             
-            activePowerup = null;
-            powerupEndTime = 0;
-        }, duration);
+        } else if (type === 'multiplier-4x') {
+            pointsMultiplier = 4;
+            powerupIndicator.textContent = '4x';
+            
+            // Efeito visual no jogador
+            player.classList.add('powerup-flash');
+            setTimeout(() => {
+                player.classList.remove('powerup-flash');
+            }, 500);
+            
+        } else if (type === 'invincible') {
+            isInvincible = true;
+            powerupIndicator.textContent = '★';
+            duration = INVINCIBILITY_DURATION;
+            
+            // Adiciona efeito visual ao jogador
+            player.classList.add('invincible');
+            
+            // Efeito de explosão ao redor do jogador
+            const playerRect = getRect(player);
+            const gameRect = getRect(gameContainer);
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createExplosion(
+                        playerRect.left - gameRect.left + playerRect.width / 2 + (Math.random() * 40 - 20),
+                        playerRect.top - gameRect.top + playerRect.height / 2 + (Math.random() * 40 - 20)
+                    );
+                }, i * 100);
+            }
+        }
         
-        // Inicia o contador visual de tempo
+        powerupEndTime = now + duration;
+        
+        // Inicia a atualização do indicador
         updatePowerupTimeIndicator();
+        
+        // Configura o timeout para remover o power-up
+        activePowerupTimeout = setTimeout(() => {
+            // Restaura os valores padrão
+            if (type === 'multiplier-2x' || type === 'multiplier-4x') {
+                pointsMultiplier = 1;
+            } else if (type === 'invincible') {
+                isInvincible = false;
+                player.classList.remove('invincible');
+            }
+            
+            // Oculta o indicador
+            powerupIndicator.classList.remove('active');
+            
+            // Limpa a referência ao power-up ativo
+            activePowerup = null;
+        }, duration);
     }
 
     // Cria o indicador de power-up na interface
@@ -611,11 +650,26 @@ document.addEventListener('DOMContentLoaded', () => {
         let dx = 0;
         let dy = 0;
         let speed = isMobileDevice ? MOBILE_PLAYER_SPEED : PLAYER_SPEED;
-
+        let isMovingFast = false;
+        let consecutiveMovement = false;
+        
+        // Verifica se estamos nos movendo na mesma direção por algum tempo
+        if (lastDx === dx && lastDy === dy && (dx !== 0 || dy !== 0)) {
+            movementCounter++;
+            if (movementCounter > 5) {
+                consecutiveMovement = true;
+            }
+        } else {
+            movementCounter = 0;
+        }
+        
         if (keysPressed['ArrowLeft'] || keysPressed['btnLeft']) dx -= speed;
         if (keysPressed['ArrowRight'] || keysPressed['btnRight']) dx += speed;
         if (keysPressed['ArrowUp'] || keysPressed['btnUp']) dy -= speed;
         if (keysPressed['ArrowDown'] || keysPressed['btnDown']) dy += speed;
+
+        // Se o movimento é grande o suficiente, considere "movimento rápido"
+        isMovingFast = Math.abs(dx) > speed/2 || Math.abs(dy) > speed/2;
 
         let newX = player.offsetLeft + dx;
         let newY = player.offsetTop + dy;
@@ -642,17 +696,46 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Math.random() < 0.2) createWindEffect(newX, newY + player.offsetHeight / 2, 'left');
         }
         
+        // Efeito de boost de velocidade quando se move consecutivamente na mesma direção
+        if (isMovingFast && consecutiveMovement && !player.classList.contains('speed-boost')) {
+            player.classList.add('speed-boost');
+            setTimeout(() => {
+                player.classList.remove('speed-boost');
+            }, SPEED_BOOST_DURATION);
+            
+            // Chance de criar efeito de rastro
+            if (Math.random() < TRAIL_EFFECT_CHANCE) {
+                createSpeedTrail(newX, newY, dx > 0 ? 'right' : 'left');
+            }
+        }
+        
         // Adiciona efeito de salto ao se mover para cima
         if (dy < 0 && !player.classList.contains('jump')) {
             player.classList.add('jump');
+            
+            // Chance de fazer uma manobra legal
+            if (Math.random() < TRICK_CHANCE) {
+                player.classList.add('trick');
+                
+                // Cria um efeito de texto para a manobra
+                const trickNames = ["Ollie!", "Kickflip!", "Heelflip!", "Pop Shove-it!", "360 Flip!"];
+                const randomTrick = trickNames[Math.floor(Math.random() * trickNames.length)];
+                createTrickText(newX, newY - 30, randomTrick);
+            }
+            
             setTimeout(() => {
                 player.classList.remove('jump');
+                player.classList.remove('trick');
             }, 500); // Corresponde à duração da animação
         }
 
         // Atualiza a posição global do jogador (relativa ao contêiner)
         playerX = newX;
         playerY = newY;
+        
+        // Armazena a última direção de movimento
+        lastDx = dx;
+        lastDy = dy;
     }
 
     // Loop principal do jogo
@@ -918,6 +1001,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Remove qualquer classe de movimento aplicada anteriormente
         player.classList.remove('move-left', 'move-right', 'jump');
 
+        // Reseta as variáveis de movimento
+        lastDx = 0;
+        lastDy = 0;
+        movementCounter = 0;
+
         // Inicia intervalos
         gameInterval = setInterval(gameLoop, GAME_LOOP_INTERVAL);
         coinInterval = setInterval(createCoin, currentCoinSpawnInterval);
@@ -1064,5 +1152,58 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             wind.remove();
         }, 400);
+    }
+
+    // Cria um efeito de rastro para movimento rápido
+    function createSpeedTrail(x, y, direction) {
+        const trail = document.createElement('div');
+        trail.classList.add('speed-trail');
+        
+        if (direction === 'left') {
+            trail.style.transform = 'scaleX(-1)';
+        }
+        
+        trail.style.left = `${x}px`;
+        trail.style.top = `${y}px`;
+        trail.style.height = `${player.offsetHeight}px`;
+        trail.style.width = `${player.offsetWidth}px`;
+        
+        gameContainer.appendChild(trail);
+        
+        // Adiciona a classe para iniciar a animação
+        setTimeout(() => {
+            trail.classList.add('speed-trail-active');
+        }, 10);
+        
+        // Remove após a animação terminar
+        setTimeout(() => {
+            if (trail && trail.parentNode) {
+                trail.remove();
+            }
+        }, 500);
+    }
+    
+    // Cria texto para manobras
+    function createTrickText(x, y, text) {
+        const trickText = document.createElement('div');
+        trickText.textContent = text;
+        trickText.classList.add('trick-text');
+        trickText.style.left = `${x}px`;
+        trickText.style.top = `${y}px`;
+        
+        gameContainer.appendChild(trickText);
+        
+        // Animação de desaparecimento
+        setTimeout(() => {
+            trickText.style.opacity = '0';
+            trickText.style.transform = 'translateY(-30px) scale(1.5)';
+        }, 100);
+        
+        // Remove após a animação
+        setTimeout(() => {
+            if (trickText && trickText.parentNode) {
+                trickText.remove();
+            }
+        }, 1000);
     }
 });
